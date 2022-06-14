@@ -1,4 +1,7 @@
 # List of untracked files to ignore
+# Course notes
+*.pdf
+
 # Windows default autosave extension
 *.asv
 
