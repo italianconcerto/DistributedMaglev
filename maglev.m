@@ -16,11 +16,13 @@ agent_sys = ss(A, B, C, D);
 K_leader = place(A,B, [0 -20]);
 
 Gr = digraph(1:5, 2:6, [2 6 1 1 3]);
-Adj = full(adjacency(Gr))
+Adj = full(adjacency(Gr));
+% Adj = zeros(6); % no interconnections
 in_degrees = sum(Adj, 1);
 D_graph = diag(in_degrees);
 L = D_graph - Adj;
 pins = [1 0 0 0 0 0];
+% pins = ones([1 6]);
 G = diag(pins);
 lambda_i = eig(L + G);
 
