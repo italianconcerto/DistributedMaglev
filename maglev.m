@@ -8,12 +8,12 @@ A = [0 1;
 
 B = [0; -9.9453];
 
-C = [7.0827 0];
+C = [708.27 0]; C = -C/100;
 
 D = [0];
 
-agent_sys = ss(A, B, C, D)
-K_leader = place(A,B, [-0.000001 -0.000092]);
+agent_sys = ss(A, B, C, D);
+K_leader = place(A,B, [0 -20]);
 
 Gr = digraph(1:5, 2:6, [2 6 1 1 3]);
 Adj = full(adjacency(Gr))
