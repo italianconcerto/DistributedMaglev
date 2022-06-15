@@ -36,3 +36,8 @@ c = 0.7;
 
 P = are(A', C'*inv(R)*C, Q)
 F = P*C'*inv(R);
+
+%for c = 0.5:.1:1
+%    out = sim('maglev_sim')
+%    plot(out.y1.Time, out.y1.Data)
+%end
