@@ -11,18 +11,18 @@ Obs_gain = place(A', C', [-3 -5]);
 % pins = ones([1 6]);
 
 % Chain topology: 1..6
-% Gr = digraph(1:5, 2:6, [2 6 1 1 3]);
-% pins = [1 0 0 0 0 0];
+Gr = digraph(1:5, 2:6, [2 6 1 1 3]);
+pins = [1 0 0 0 0 0];
 
 % Tree topology (see report)
-Gr = digraph([1 1 4 4], [2 3 5 6], ones([4 1]));
-pins = [1 0 0 1 0 0];
+% Gr = digraph([1 1 4 4], [2 3 5 6], ones([4 1]));
+% pins = [1 0 0 1 0 0];
 
 % Fully connected topology
 % Gr = digraph(ones([6 6]), 'omitselfloops');
 % pins = [1 0 0 0 0 0];
 
-plot(Gr);
+% plot(Gr);
 Adj = full(adjacency(Gr, 'weighted'));
 % Adj = zeros(6); % no interconnections
 in_degrees = sum(Adj, 1);
@@ -36,12 +36,20 @@ P = are(A, B*inv(R)*(B'), Q);
 K = inv(R)*(B')*P;
 
 min_c = 1/(2*min(real(lambda_i)))
-c = 1.5*min_c;
+c = 0.51;
 
 P = are(A', C'*inv(R)*C, Q)
 F = P*C'*inv(R);
 
-out = sim('maglev_sim')
+c_values = linspace(min_c + 0.1, 3*min_c, 20);
+
+all_rise_times = zeros([20 1]);
+
+i = 20;
+%for i = 1:20
+c = c_values(i)
+
+out = sim('maglev_sim');
 
 rise_times = zeros([6 2]);
 rise_low_thres = 0.1;
@@ -58,12 +66,14 @@ rise_times(5, 1) = out.y1.Time(find(out.y5.Data > rise_low_thres, 1)) - 1;
 rise_times(5, 2) = out.y1.Time(find(out.y5.Data > rise_high_thres, 1)) - 1;
 rise_times(6, 1) = out.y1.Time(find(out.y6.Data > rise_low_thres, 1)) - 1;
 rise_times(6, 2) = out.y1.Time(find(out.y6.Data > rise_high_thres, 1)) - 1;
-rise_times
 
 leader_rise_times = [0 0];
 leader_rise_times(1) = out.y_leader.Time(find(out.y_leader.Data > rise_low_thres, 1)) - 1;
 leader_rise_times(2) = out.y_leader.Time(find(out.y_leader.Data > rise_high_thres, 1)) - 1;
-leader_rise_times
 
-% plot(out.y1.Time, out.y1.Data)
+all_rise_times(i) = rise_times(6, 2);
+rise_times(6, 2)
+%end
+
+%plot(c_values, all_rise_times)
 
