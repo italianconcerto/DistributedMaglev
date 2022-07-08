@@ -23,10 +23,10 @@ initial_x = [0 -poles(1)/C(1)*R];
 % TODO !!!! we can't access the state variables
 % -> need to use an observer that feeds the controller
 K_leader = acker(A, B, poles);
-A = A - B*K_leader;
+% A = A - B*K_leader;
 
 agent_sys = ss(A, B, C, D);
-Obs_gain = place(A', C', [-3 -5]);
+Obs_gain = place(A', C', [-1 -2]).';
 
 % Debug topology: all nodes are pinned
 % pins = ones([1 6]);
