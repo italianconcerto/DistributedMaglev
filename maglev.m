@@ -1,12 +1,28 @@
 A = [0 1; 880.87 0];
 B = [0; -9.9453];
-% C = [708.27 0] / 1e3;
-C = [1 0];
-D = [0];
+C = [708.27 0];
+D = 0;
+
+% Uncomment the section with the desired reference behavior.
+
+% Constant value R
+R = 1;
+poles = [-10 0];
+initial_x = [0 -poles(1)/C(1)*R];
+
+% Ramp of slope R
+% R = 1;
+% poles = [0 0];
+% initial_x = [0 R/C(1)];
+
+% Cosine wave of amplitude a and frequency omega
+% a = 1; omega = 1;
+% poles = [+omega*i -omega*i];
+% initial_x = [0 a/C(1)];
 
 % TODO !!!! we can't access the state variables
 % -> need to use an observer that feeds the controller
-K_leader = acker(A, B, [-20 0]);
+K_leader = acker(A, B, poles);
 A = A - B*K_leader;
 
 agent_sys = ss(A, B, C, D);
