@@ -1,4 +1,8 @@
-A = [0 1; 880.87 0];
+clear all
+close all
+clc
+
+raw_A = [0 1; 880.87 0];
 B = [0; -9.9453];
 C = [708.27 0];
 D = 0;
@@ -20,10 +24,8 @@ initial_x = [0 -poles(1)/C(1)*R];
 % poles = [+omega*i -omega*i];
 % initial_x = [0 a/C(1)];
 
-% TODO !!!! we can't access the state variables
-% -> need to use an observer that feeds the controller
-K_leader = acker(A, B, poles);
-% A = A - B*K_leader;
+K_leader = acker(raw_A, B, poles);
+A = raw_A - B*K_leader; % stabilized A (that will be used for distr. ctrl)
 
 agent_sys = ss(A, B, C, D);
 Obs_gain = place(A', C', [-1 -2]).';
@@ -58,10 +60,22 @@ K = inv(R)*(B')*P;
 
 min_c = 1/(2*min(real(lambda_i)))
 c = 0.6;
+if c < min_c
+    error("Invalid value for c")
+end
 
 R = 5; Q = eye(2);
 P = are(A', C'*inv(R)*C, Q)
-F = P*C'*inv(R);
+% F = P*C'*inv(R); % distr. observer poles
+F = place(A', -c*C', [-3 -4]).'
+
+if 0 == 0
+    % Using local observer
+    if any(eig(A+c*F*C) > 0)
+        error("A+cFC is not Hurwitz!")
+    end
+end
+F = zeros(size(F))
 
 if 0 == 1
     c_values = linspace(min_c + 0.1, 3*min_c, 20);
