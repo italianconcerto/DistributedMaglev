@@ -24,11 +24,11 @@ initial_x = [0 -poles(1)/C(1)*R];
 % poles = [+omega*i -omega*i];
 % initial_x = [0 a/C(1)];
 
+Obs_gain = place(raw_A', C', [-1 -2]).';
 K_leader = acker(raw_A, B, poles);
 A = raw_A - B*K_leader; % stabilized A (that will be used for distr. ctrl)
 
 agent_sys = ss(A, B, C, D);
-Obs_gain = place(A', C', [-1 -2]).';
 
 % Debug topology: all nodes are pinned
 % pins = ones([1 6]);
