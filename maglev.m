@@ -64,17 +64,18 @@ if c < min_c
     error("Invalid value for c")
 end
 
-% Uncomment the section with the desired observer type.
+% Select the desired observer type.
+USE_LOCAL_OBSERVER = 0
 
-% Distributed observer
-R = 5; Q = eye(2);
-P = are(A', C'*inv(R)*C, Q)
-F = P*C'*inv(R);
-
-% Local observer
-F = place(A', -c*C', [-3 -4]).';
-if any(eig(A+c*F*C) > 0)
-    error("A+cFC is not Hurwitz!")
+if USE_LOCAL_OBSERVER
+    F = place(A', -c*C', [-3 -4]).';
+    if any(eig(A+c*F*C) > 0)
+        error("A+cFC is not Hurwitz!")
+    end
+else
+    R = 5; Q = eye(2);
+    P = are(A', C'*inv(R)*C, Q);
+    F = P*C'*inv(R);
 end
 
 if 0 == 1
