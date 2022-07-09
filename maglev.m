@@ -57,8 +57,9 @@ P = are(A, B*inv(R)*(B'), Q);
 K = inv(R)*(B')*P;
 
 min_c = 1/(2*min(real(lambda_i)))
-c = 3;
+c = 0.6;
 
+R = 5; Q = eye(2);
 P = are(A', C'*inv(R)*C, Q)
 F = P*C'*inv(R);
 
