@@ -64,18 +64,18 @@ if c < min_c
     error("Invalid value for c")
 end
 
+% Uncomment the section with the desired observer type.
+
+% Distributed observer
 R = 5; Q = eye(2);
 P = are(A', C'*inv(R)*C, Q)
-% F = P*C'*inv(R); % distr. observer poles
-F = place(A', -c*C', [-3 -4]).'
+F = P*C'*inv(R);
 
-if 0 == 0
-    % Using local observer
-    if any(eig(A+c*F*C) > 0)
-        error("A+cFC is not Hurwitz!")
-    end
+% Local observer
+F = place(A', -c*C', [-3 -4]).';
+if any(eig(A+c*F*C) > 0)
+    error("A+cFC is not Hurwitz!")
 end
-F = zeros(size(F))
 
 if 0 == 1
     c_values = linspace(min_c + 0.1, 3*min_c, 20);
