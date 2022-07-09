@@ -47,10 +47,11 @@ pins = [1 0 0 0 0 0];
 
 % plot(Gr);
 Adj = full(adjacency(Gr, 'weighted'));
+adj_unw = full(adjacency(Gr));
 % Adj = zeros(6); % no interconnections
-in_degrees = sum(Adj, 1);
+in_degrees = sum(adj_unw, 1);
 D_graph = diag(in_degrees);
-L = D_graph - Adj;
+L = D_graph - adj_unw;
 G = diag(pins);
 lambda_i = eig(L + G);
 
