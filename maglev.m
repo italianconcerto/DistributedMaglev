@@ -19,7 +19,7 @@ initial_x = [0 -poles(1)/C(1)*R];
 % poles = [0 0];
 % initial_x = [0 R/C(1)];
 
-% Cosine wave of amplitude a and frequency omega
+% Sine wave of amplitude a and frequency omega
 % a = 1; omega = 1;
 % poles = [+omega*i -omega*i];
 % initial_x = [0 a/C(1)];
@@ -28,13 +28,12 @@ Obs_gain = place(raw_A', C', [-1 -2]).';
 K_leader = acker(raw_A, B, poles);
 A = raw_A - B*K_leader; % stabilized A (that will be used for distr. ctrl)
 
-agent_sys = ss(A, B, C, D);
-
 % Debug topology: all nodes are pinned
 % pins = ones([1 6]);
 
 % Chain topology: 1..6
-Gr = digraph(1:5, 2:6, [2 6 1 1 3]);
+% Gr = digraph(1:5, 2:6, [2 6 1 1 3]);
+Gr = digraph(1:5, 2:6);
 pins = [1 0 0 0 0 0];
 
 % Tree topology (see report)
@@ -66,7 +65,7 @@ if c < min_c
 end
 
 % Select the desired observer type.
-USE_LOCAL_OBSERVER = 0
+USE_LOCAL_OBSERVER = 1
 
 if USE_LOCAL_OBSERVER
     F = place(A', -c*C', [-3 -4]).';
@@ -79,40 +78,59 @@ else
     F = P*C'*inv(R);
 end
 
-if 0 == 1
-    c_values = linspace(min_c + 0.1, 3*min_c, 20);
+% Set to 1 if you're not interested in running a parameter sweep
+if 0
+    c = 3*min_c;
 
-    all_rise_times = zeros([20 1]);
-    
-    i = 20;
-    %for i = 1:20
-    c = c_values(i)
-    
-    out = sim('maglev_sim');
-    
-    rise_times = zeros([6 2]);
+    rise_times = zeros([6 3]);
     rise_low_thres = 0.1;
     rise_high_thres = 0.9;
-    rise_times(1, 1) = out.y1.Time(find(out.y1.Data > rise_low_thres, 1)) - 1;
-    rise_times(1, 2) = out.y1.Time(find(out.y1.Data > rise_high_thres, 1)) - 1;
-    rise_times(2, 1) = out.y1.Time(find(out.y2.Data > rise_low_thres, 1)) - 1;
-    rise_times(2, 2) = out.y1.Time(find(out.y2.Data > rise_high_thres, 1)) - 1;
-    rise_times(3, 1) = out.y1.Time(find(out.y3.Data > rise_low_thres, 1)) - 1;
-    rise_times(3, 2) = out.y1.Time(find(out.y3.Data > rise_high_thres, 1)) - 1;
-    rise_times(4, 1) = out.y1.Time(find(out.y4.Data > rise_low_thres, 1)) - 1;
-    rise_times(4, 2) = out.y1.Time(find(out.y4.Data > rise_high_thres, 1)) - 1;
-    rise_times(5, 1) = out.y1.Time(find(out.y5.Data > rise_low_thres, 1)) - 1;
-    rise_times(5, 2) = out.y1.Time(find(out.y5.Data > rise_high_thres, 1)) - 1;
-    rise_times(6, 1) = out.y1.Time(find(out.y6.Data > rise_low_thres, 1)) - 1;
-    rise_times(6, 2) = out.y1.Time(find(out.y6.Data > rise_high_thres, 1)) - 1;
+
+    out = sim("maglev_sim");
+    time = out.y_leader.Time;
+    data = squeeze(out.y.Data);
+
+    for j = 1:6
+        rise_times(j, 1) = out.y.Time(find(data(j, :) > rise_low_thres, 1));
+        rise_times(j, 2) = out.y.Time(find(data(j, :) > rise_high_thres, 1));
+    end
+    rise_times(:, 3) = rise_times(:, 2) - rise_times(:, 1);
+        
+    leader_rise_times = [0 0 0];
+    leader_rise_times(1) = out.y_leader.Time(find(out.y_leader.Data > rise_low_thres, 1));
+    leader_rise_times(2) = out.y_leader.Time(find(out.y_leader.Data > rise_high_thres, 1));
+    leader_rise_times(3) = leader_rise_times(2) - leader_rise_times(1);
+
+    leader_rise_times
+    rise_times
+else
+    c_values = linspace(min_c + 0.1, 3*min_c, 20);
     
-    leader_rise_times = [0 0];
-    leader_rise_times(1) = out.y_leader.Time(find(out.y_leader.Data > rise_low_thres, 1)) - 1;
-    leader_rise_times(2) = out.y_leader.Time(find(out.y_leader.Data > rise_high_thres, 1)) - 1;
+    all_rise_times = zeros([20 1]);
     
-    all_rise_times(i) = rise_times(6, 2);
-    rise_times(6, 2)
-    %end
+    for i = 1:20
+        c = c_values(i)
+        
+        out = sim("maglev_sim");
+        
+        rise_times = zeros([6 2]);
+        rise_low_thres = 0.1;
+        rise_high_thres = 0.9;
+        time = out.y_leader.Time;
+        data = squeeze(out.y.Data);
     
-    %plot(c_values, all_rise_times)
+        for j = 1:6
+            rise_times(j, 1) = out.y.Time(find(data(j, :) > rise_low_thres, 1));
+            rise_times(j, 2) = out.y.Time(find(data(j, :) > rise_high_thres, 1));
+        end
+            
+        leader_rise_times = [0 0];
+        leader_rise_times(1) = out.y_leader.Time(find(out.y_leader.Data > rise_low_thres, 1));
+        leader_rise_times(2) = out.y_leader.Time(find(out.y_leader.Data > rise_high_thres, 1));
+        
+        all_rise_times(i) = rise_times(6, 2);
+        rise_times(6, 2)
+    end
+    
+    plot(c_values, all_rise_times)
 end
